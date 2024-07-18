@@ -166,14 +166,13 @@ def main(args):
                         log_events = []
 
             # Push remaining logs after container exits
-            for line in container.logs(stdout=True, stderr=True):
-                message = line.decode('utf-8').strip()
-                if message:
-                    log_event = {
-                        'timestamp': datetime.datetime.now(datetime.timezone.utc).timestamp(),
-                        'message': message
-                    }
-                    log_events.append(log_event)
+            log_events.extend([
+                {
+                    'timestamp': datetime.datetime.now(datetime.timezone.utc).timestamp(),
+                    'message': line.decode('utf-8').strip()
+                }
+                for line in container.logs(stdout=True, stderr=True) if line.decode('utf-8').strip()
+            ])
 
             # Push any remaining log events
             if log_events:
@@ -209,4 +208,3 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     main(args)
-
